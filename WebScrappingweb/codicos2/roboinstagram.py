@@ -1,20 +1,15 @@
-import time
-
 import pandas as pd
-#pip install pandas
-
+import time
 from selenium import webdriver
-from  selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-#pip install selenium
 
 service = Service()
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(service=service, options=options)
 
-login = ''
-senha = ''
+'''login = 'alanzoka75'
+senha = 'Bill8828'
 url = 'https://www.instagram.com/'
 inputs = driver.find_elements(By.TAG_NAME, 'input')
 
@@ -24,20 +19,45 @@ driver.find_element(By.TAG_NAME, value="input").send_keys(login)
 driver.find_element(By.NAME, value="password").send_keys(senha)
 botoes = driver.find_elements(By.TAG_NAME, 'button')[:]
 botoes[1].click()
-time.sleep(2.5)
+time.sleep(2.5)'''
 
 url2 = 'https://www.instagram.com/remamadragaorosa/reels/'
+
 driver.get(url2)
+
 time.sleep(5)
+scroll_pause_time = 3  # pausa no tempo do scroll para acompanhar o processo
+screen_height = driver.execute_script("return window.screen.height;")  # pega o tamanho da pagina
+i = 1
+reels = []
+links_reels = []
+descs_reels = []
 
-links = driver.find_elements(By.CLASS_NAME, '_aajy')
-print(len(links))
-dados = []
+while True:
+    # desce a pagina no tamanho de uma tela por vez
+    driver.execute_script("window.scrollTo(0, {screen_height}*{i});".format(screen_height=screen_height, i=i))
+    i += 1
+    time.sleep(scroll_pause_time)
 
-for i in links  :
-    vizus = i.find_element(By.CLASS_NAME, 'html-span').text
-    dados.append(vizus)
-    #time.sleep(0.2)
+    reels = driver.find_elements(By.CLASS_NAME, '_aajy')[:]
+    links_reels = [reel.find_element(By.TAG_NAME, 'a').get_attribute('href') for reel in reels][:]
+    print(len(reels))
+    print(len(links_reels))
 
-print(links)
-print(dados)
+    # atualize a altura da rolagem sempre que rolar, pois a altura da rolagem pode mudar depois que rolamos a página
+    scroll_height = driver.execute_script("return document.body.scrollHeight;")
+    # interrompa o loop quando a altura que precisamos rolar for maior que a altura total da rolagem
+    if (screen_height) * i > scroll_height:
+        break
+
+
+for link in links_reels:
+    driver.get(link)
+    time.sleep(3)
+    meta_reel = driver.find_element(By.NAME, 'description')
+    desc_reel = meta_reel.get_attribute('content')
+    print(desc_reel)
+    descs_reels.append(desc_reel)
+    driver.back()
+
+print(descs_reels)
